@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <title>Resume Screening and Talent Matching</title>
+        <link rel="stylesheet" href="style.css"/>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Resume Screening and Talent Matching</h1>
+    
+            <!-- Form to Upload Resumes -->
+            <form id="screeningForm">
+                <label for="resume" class="custom-file-upload">Upload Resume (PDF, DOCX):</label>
+                <input type="file" id="resume" name="resume" accept=".pdf, .docx" required multiple>
+    
+                <label for="jobDesc">Select Job:</label>
+                <select id="jobDesc" name="jobDesc" required>
+                    <option value="">-- Select Job Description --</option>
+                    <option value="Product Owner">Product Owner</option>
+                    <option value="Developer">Developer (C#.NET)</option>
+                    <option value="Software Engineer">Software Engineer</option>
+                    <option value="Junior Software Engineer">Junior Software Engineer</option>
+                    <option value="Associate Software">Associate Software Developer in Test</option>
+                    <option value="Customer Operations">Customer Operations Executive</option>
+                    <option value="Associate Software Developer">Associate Software Developer in Test</option>
+                    <option value="Support Analyst">Support Analyst</option>
+                    <option value="DevOps Engineer">PaaS DevOps Engineer</option>
+                    <!-- Add more job descriptions as needed -->
+                </select>
+    
+                <!-- <label for="skills">Specify Skills or Keywords (comma-separated):</label>
+                <input type="text" id="skills" name="skills" placeholder="e.g., JavaScript, Python, SQL"> -->
+    
+                <button type="button" onclick="analyzeResume()">Match Resume to Job</button>
+            </form>
+    
+            <div id="result" class="result" style="display: none;">
+                <h3>Matching Results</h3>
+
+                <table id="matching-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Skills
+                                <!-- <label for="searchSkills">Search by Skill:</label> -->
+                                <input type="text" id="searchSkills" placeholder="Type a skill..."> 
+                            </th>
+                            <th>Matching Score (%)</th>
+                            <th>
+                                <button class="toggle-column-btn" id="toggle-column-btn">+</button>
+                                <th id="experience-column" style="display: none;">Years of Experience</th>
+                                
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="matching-table-body">
+                        <!-- Table rows will be generated dynamically -->
+                        <tr>
+                            <td>John Doe</td>
+                            <td>JavaScript, Python, SQL, HTML, CSS</td>
+                            <td id="experience-cell" style="display: none;">8 years</td>
+        </tr>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>Java, C++, Python, Data Structures, Algorithms</td>
+                            <td id="experience-cell" style="display: none;">2 years</td>
+        </tr>
+                        </tr>
+                        <tr>
+                            <td>Bob Johnson</td>
+                            <td>JavaScript, React, Node.js, MongoDB, Express</td>
+                            <td id="experience-cell" style="display: none;">4 years</td>
+        </tr>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <script src="script.js">
+
+        </script>
+    </body>
+</html>
