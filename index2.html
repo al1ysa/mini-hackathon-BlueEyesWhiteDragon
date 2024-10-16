@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.1/full/pyodide.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        textarea { width: 100%; height: 200px; }
+    </style>
+</head>
+<body>
+
+<h1>Resume Analyzer</h1>
+
+<input type="file" id="resumeUpload" accept=".pdf" />
+<button id="analyzeButton">Analyze Resume</button>
+
+<h2>Analysis Result:</h2>
+<textarea id="result" readonly></textarea>
+
+<script type="text/javascript">
+    async function loadPyodideAndPackages() {
+        let pyodide = await loadPyodide();
+        await pyodide.loadPackage("PyPDF2");
+        return pyodide;
+    }
+
+    async function analyzeResume() {
+        const pyodide = await loadPyodideAndPackages();
+
+        const pdfFile = document.getElementById("resumeUpload").files[0];
+        if (!pdfFile) {
+            alert("Please upload a PDF resume.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const pdfData = event.target.result;
+
+            // Python code to analyze the resume
+            const pythonCode = `
+import PyPDF2
+import json
+import requests
+
+# Function to extract text from a PDF file
+def extract_text_from_pdf(pdf_data):
+    reader = PyPDF2.PdfReader(pdf_data)
+    text = ''
+    for page in reader.pages:
+        text += page.extract_text() + '\\n'  # Adding a newline for better readability
+    return text.strip()  # Remove leading/trailing whitespace
+
+# Set your Azure OpenAI credentials
+AZURE_OPENAI_API_KEY = "aa742488a7984f4cbc2dddf01b5699ed"
+AZURE_OPENAI_ENDPOINT = "https://minihackathon06.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview"
+
+# Sample job description
+job_description = """
+Software Engineer
+We are looking for a software engineer with experience in software development, problem-solving skills, and familiarity with programming languages like Python and Java.
+"""
+
+# Extract text from the PDF resume
+resume_text = extract_text_from_pdf(pdf_data)
+
+# Create the prompt for the API
+prompt = f"""You are an AI assistant that analyzes resumes and matches them with job descriptions.
+
+Job Description: {job_description}
+
+Resume: {resume_text}
+
+Please analyze the resume and provide a match score (0-100), along with a brief explanation of why the resume is a good or bad fit for the job description.
+"""
+
+# Prepare the request payload
+headers = {
+    "Content-Type": "application/json",
+    "api-key": AZURE_OPENAI_API_KEY
+}
+
+data = {
+    "messages": [
+        {"role": "user", "content": prompt}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 150
+}
+
+# Make the API request
+response = requests.post(AZURE_OPENAI_ENDPOINT, headers=headers, json=data)
+
+# Check for a successful response
+if response.status_code == 200:
+    result = response.json()
+    message = result['choices'][0]['message']['content']
+else:
+    message = f"Error: {response.status_code} {response.text}"
+
+message
+`;
+            // Execute the Python code
+            const result = await pyodide.runPythonAsync(pythonCode, { pdf_data: pdfData });
+            document.getElementById("result").value = result;
+        };
+        reader.readAsBinaryString(pdfFile);
+    }
+
+    document.getElementById("analyzeButton").onclick = analyzeResume;
+</script>
+
+</body>
+</html>
