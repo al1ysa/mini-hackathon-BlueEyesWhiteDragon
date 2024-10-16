@@ -1,7 +1,8 @@
 import os
-import json
 import requests
 import PyPDF2
+from docx import Document
+import win32com.client  # Only works on Windows for .doc files
 
 # Set your Azure OpenAI credentials
 AZURE_OPENAI_API_KEY = "aa742488a7984f4cbc2dddf01b5699ed"
@@ -16,17 +17,46 @@ def extract_text_from_pdf(pdf_path):
             text += page.extract_text() + '\n'  # Adding a newline for better readability
     return text.strip()  # Remove leading/trailing whitespace
 
-# Sample job description
-job_description = """
-Software Engineer
-We are looking for a software engineer with experience in software development, problem-solving skills, and familiarity with programming languages like Python and Java.
-"""
+# Function to extract text from a .docx file
+def extract_text_from_docx(docx_path):
+    doc = Document(docx_path)
+    text = ''
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + '\n'
+    return text.strip()
 
-# Path to the resume PDF
-pdf_resume_path = 'path_to_your_resume.pdf'  # Update this to your PDF file path
+# Function to extract text from a .doc file (Windows only)
+def extract_text_from_doc(doc_path):
+    word = win32com.client.Dispatch("Word.Application")
+    word.Visible = False
+    doc = word.Documents.Open(doc_path)
+    text = doc.Content.Text
+    doc.Close()
+    word.Quit()
+    return text.strip()
 
-# Extract text from the PDF resume
-resume_text = extract_text_from_pdf(r"C:\Users\user\Desktop\misc\Uni work\year 3\Sem 1\hackathon\code\pythonProject\resumes\Anna.pdf")
+# Paths to the resume and job description files
+resume_path = r'C:\Users\user\Desktop\misc\Uni work\year 3\Sem 1\hackathon\code\pythonProject\resumes\CCHHTT_Java Developer.docx'  # Update this to your resume file path
+job_description_path = r'C:\Users\user\Desktop\misc\Uni work\year 3\Sem 1\hackathon\code\pythonProject\job descriptions\Associate Software Developer in Test.docx'  # Update this to your job description file path
+
+# Determine the file types and extract text accordingly
+if resume_path.endswith('.pdf'):
+    resume_text = extract_text_from_pdf(resume_path)
+elif resume_path.endswith('.docx'):
+    resume_text = extract_text_from_docx(resume_path)
+elif resume_path.endswith('.doc'):
+    resume_text = extract_text_from_doc(resume_path)
+else:
+    raise ValueError("Unsupported resume file format!")
+
+if job_description_path.endswith('.pdf'):
+    job_description = extract_text_from_pdf(job_description_path)
+elif job_description_path.endswith('.docx'):
+    job_description = extract_text_from_docx(job_description_path)
+elif job_description_path.endswith('.doc'):
+    job_description = extract_text_from_doc(job_description_path)
+else:
+    raise ValueError("Unsupported job description file format!")
 
 # Create the prompt for the API
 prompt = f"""You are an AI assistant that analyzes resumes and matches them with job descriptions.
